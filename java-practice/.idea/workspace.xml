@@ -5,13 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9c83ba8e-3ae0-4b59-a46c-12c2a7cf3d5a" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/java_practice/build.gradle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/java_practice/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/java_practice/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/java_practice/gradlew" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/java_practice/gradlew.bat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/java_practice/settings.gradle" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/java_practice/src/main/java/org/example/Main.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
