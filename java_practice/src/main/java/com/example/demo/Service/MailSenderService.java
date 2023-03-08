@@ -1,6 +1,7 @@
 package com.example.demo.Service;
 
 import com.example.demo.config.MailConfig;
+import com.example.demo.config.MailConfigValue;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.MailException;
@@ -18,6 +19,7 @@ public class MailSenderService {
     private final MailSender mailSender;
     private final JavaMailSender javaMailSender;
     private final MailConfig mailConfig;
+    private final MailConfigValue mailConfigValue;
 
     public boolean sendMail() {
             var mailInfo = new SimpleMailMessage();
@@ -60,6 +62,7 @@ public class MailSenderService {
 
     public boolean smtpMailSender() {
         System.out.print(mailConfig.getHost());
+        System.out.print(mailConfigValue.getPort());
         return true;
     }
 }
