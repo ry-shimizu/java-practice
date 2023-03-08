@@ -16,16 +16,19 @@ public class MailSenderController {
 
     @PostMapping("/mailSender")
     public ResponseEntity<MailSenderResponse> mailSend() {
-        var result = mailSenderService.sendMail();
-        return ResponseEntity.ok().body(new MailSenderResponse("success", result));
+        return ResponseEntity.ok().body(new MailSenderResponse("success", mailSenderService.sendMail()));
         // どっちでも返却値は同じ 意図的に404返したい時などに利用？
         // return new MailSenderResponse("success", result);
     }
 
     @PostMapping("/javaMailSender")
     public ResponseEntity<MailSenderResponse> javaMailSender() {
-        var result = mailSenderService.javaMailSender();
-        return ResponseEntity.ok().body(new MailSenderResponse("success", true));
+        return ResponseEntity.ok().body(new MailSenderResponse("success", mailSenderService.javaMailSender()));
+    }
+
+    @PostMapping("/smtpMailSender")
+    public MailSenderResponse smtpMailSender() {
+        return new MailSenderResponse("success", mailSenderService.smtpMailSender());
     }
 
 }

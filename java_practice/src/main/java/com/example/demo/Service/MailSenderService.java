@@ -1,5 +1,6 @@
 package com.example.demo.Service;
 
+import com.example.demo.config.MailConfig;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.MailException;
@@ -16,6 +17,7 @@ public class MailSenderService {
 
     private final MailSender mailSender;
     private final JavaMailSender javaMailSender;
+    private final MailConfig mailConfig;
 
     public boolean sendMail() {
             var mailInfo = new SimpleMailMessage();
@@ -54,5 +56,10 @@ public class MailSenderService {
             // 終わらせず、処理を続けるのであれば、スタックトレースを残す
             // e.printStackTrace();
         }
+    }
+
+    public boolean smtpMailSender() {
+        System.out.print(mailConfig.getHost());
+        return true;
     }
 }

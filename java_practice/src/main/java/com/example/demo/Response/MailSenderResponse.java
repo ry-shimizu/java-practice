@@ -12,4 +12,5 @@ public class MailSenderResponse {
 
     // メール送信結果
     private boolean result;
+
 }
