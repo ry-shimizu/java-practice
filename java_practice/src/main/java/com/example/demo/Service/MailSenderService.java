@@ -2,8 +2,11 @@ package com.example.demo.Service;
 
 import com.example.demo.config.MailConfig;
 import com.example.demo.config.MailConfigValue;
-import jakarta.mail.MessagingException;
+import jakarta.mail.*;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
@@ -11,9 +14,13 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Properties;
+
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MailSenderService {
 
     private final MailSender mailSender;
@@ -61,8 +68,35 @@ public class MailSenderService {
     }
 
     public boolean smtpMailSender() {
-        System.out.print(mailConfig.getHost());
-        System.out.print(mailConfigValue.getPort());
-        return true;
+        var properties = new Properties();
+        properties.put("mail.host", mailConfig.getHost());
+        properties.put("mail.smtp.host", mailConfig.getHost());
+        properties.put("mail.smtp.port", mailConfig.getPort());
+        properties.put("mail.smtp.auth", mailConfigValue.isAuth());
+        properties.put("mail.smtp.starttls.enable","true");
+
+       class smtpAuth extends Authenticator {
+           @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(mailConfig.getUserName(), mailConfig.getPassword());
+            }
+        }
+        // メールセッションの確立
+        var session = Session.getInstance(properties, new smtpAuth());
+
+       // メッセージ部分の作成
+        var message = new MimeMessage(session);
+        try {
+            // message.setFrom("ryouya56395639@gmail.com"); メールのFROMにメールアドレスだけでなく、文字を入れたい時下のを利用
+            message.setFrom(new InternetAddress("ryouya56395639", "テスト"));
+            message.setText("javaのメール送信テスト");
+            message.setSubject("テストで送ります");
+            message.setRecipients(Message.RecipientType.TO, "nagahisawebpage@gmail.com");
+            message.setRecipients(Message.RecipientType.CC, "shigeta@gmail.com");
+            Transport.send(message);
+            return true;
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            throw new RuntimeException("smtpメール送信エラー", e);
+        }
     }
 }

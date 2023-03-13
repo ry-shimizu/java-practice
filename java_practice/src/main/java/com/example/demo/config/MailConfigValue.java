@@ -7,6 +7,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Getter
 public class MailConfigValue {
-    @Value("${spring.mail.port}")
-    private int port;
+    @Value("${spring.mail.properties.mail.smtp.auth}")
+    private boolean auth;
 }
