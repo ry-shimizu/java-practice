@@ -69,7 +69,6 @@ public class MailSenderService {
 
     public boolean smtpMailSender() {
         var properties = new Properties();
-        properties.put("mail.host", mailConfig.getHost());
         properties.put("mail.smtp.host", mailConfig.getHost());
         properties.put("mail.smtp.port", mailConfig.getPort());
         properties.put("mail.smtp.auth", mailConfigValue.isAuth());
@@ -88,7 +87,7 @@ public class MailSenderService {
         var message = new MimeMessage(session);
         try {
             // message.setFrom("ryouya56395639@gmail.com"); メールのFROMにメールアドレスだけでなく、文字を入れたい時下のを利用
-            message.setFrom(new InternetAddress("ryouya56395639", "テスト"));
+            message.setFrom(new InternetAddress("ryouya56395639@gmail.com", "テスト"));
             message.setText("javaのメール送信テスト");
             message.setSubject("テストで送ります");
             message.setRecipients(Message.RecipientType.TO, "nagahisawebpage@gmail.com");
