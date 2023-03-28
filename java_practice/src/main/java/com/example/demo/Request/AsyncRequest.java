@@ -1,10 +1,13 @@
 package com.example.demo.Request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
 
 @Getter
 public class AsyncRequest {
     @NotNull
-    public String message;
+    private String message;
+
+    private int activeNum;
+
 }
