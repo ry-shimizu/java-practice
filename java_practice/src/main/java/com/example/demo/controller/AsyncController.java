@@ -30,4 +30,9 @@ public class AsyncController {
     public AsyncResponse useThreadPool(@Validated @RequestBody AsyncRequest request) {
         return new AsyncResponse(asyncService.useThreadPool(request, LocalDateTime.now()));
     }
+
+    @PostMapping("/useScheduleThreadPool")
+    public AsyncResponse useScheduleThreadPool(@Validated @RequestBody AsyncRequest request) {
+        return new AsyncResponse(asyncService.useScheduleThreadPool(request, LocalDateTime.now()));
+    }
 }

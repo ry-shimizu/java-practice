@@ -99,6 +99,7 @@ public class AsyncService {
         Future<String> result = threadPool.submit(new callable());
         Future<String> result2 = threadPool.submit(new callable());
         threadPool.execute(new commonTask());
+        IntStream.rangeClosed(1, 50).forEach(a -> log.info(String.valueOf(a)));
         try {
             log.info(result.get());
             log.info(result2.get());
@@ -107,6 +108,28 @@ public class AsyncService {
         } catch (InterruptedException e) {
             throw new RuntimeException(now + "←の時刻で割り込み処理がありました", e);
         }
+
+        return AsyncDto.builder()
+                .status("success")
+                .result(true)
+                .time(now)
+                .build();
+    }
+
+    // ScheduleThread
+    public AsyncDto useScheduleThreadPool(AsyncRequest request, LocalDateTime now) {
+        var threadpool = Executors.newScheduledThreadPool(2);
+        // threadpool.scheduleWithFixedDelay(new commonTask(), 1, 1, TimeUnit.SECONDS);
+        threadpool.scheduleWithFixedDelay(() -> {log.info(String.valueOf(Thread.currentThread().getId()));},
+                1, 1, TimeUnit.SECONDS);
+        threadpool.scheduleWithFixedDelay(() -> {log.info(String.valueOf(Thread.currentThread().getId()));},
+                1, 1, TimeUnit.SECONDS);
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException("割り込み処理が発生", e);
+        }
+        threadpool.shutdown();
 
         return AsyncDto.builder()
                 .status("success")
@@ -126,8 +149,8 @@ public class AsyncService {
             Optional<String> c = Optional.ofNullable(null);
             a = b.map(String::toUpperCase);
 
-            List<String> list = Stream.of(a,b,c).map(op -> op.orElse("置換")).toList();
-            Set<String> set = Stream.of(a,b,c).map(op -> op.orElse("置換")).filter(fil -> fil.endsWith("e")).collect(Collectors.toSet());
+            List<String> list = Stream.of(a,b,c).map(op -> op.orElse("置換" + Thread.currentThread().getId())).toList();
+            Set<String> set = Stream.of(a,b,c).map(op -> op.orElse("置換" + Thread.currentThread().getId() + "e")).filter(fil -> fil.endsWith("e")).collect(Collectors.toSet());
 
             list.forEach(log::info);
             set.forEach(log::info);
