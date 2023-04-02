@@ -5,6 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,6 +23,11 @@ import java.util.stream.Stream;
 @Slf4j
 public class AsyncService {
     private final MailSenderService mailSenderService;
+    private final UseThreadPoolTaskTest useThreadPoolTaskTest;
+
+    @Autowired
+    @Qualifier("Thread2")
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     // Runnableインターフェース、Threadクラス利用
     public AsyncDto normalAsync(AsyncRequest request, LocalDateTime now) {
@@ -97,39 +106,36 @@ public class AsyncService {
         }
 
         Future<String> result = threadPool.submit(new callable());
-        Future<String> result2 = threadPool.submit(new callable());
         threadPool.execute(new commonTask());
-        IntStream.rangeClosed(1, 50).forEach(a -> log.info(String.valueOf(a)));
+        threadPool.execute(new commonTask());
+        Future<String> result2 = threadPool.submit(new callable());
         try {
-            log.info(result.get());
-            log.info(result2.get());
+            return AsyncDto.builder()
+                    .status("success")
+                    .result(true)
+                    .message(result2.get())
+                    .time(now)
+                    .build();
         } catch (ExecutionException e) {
             throw new RuntimeException(now + "非同期処理中に問題発生", e);
         } catch (InterruptedException e) {
             throw new RuntimeException(now + "←の時刻で割り込み処理がありました", e);
         }
-
-        return AsyncDto.builder()
-                .status("success")
-                .result(true)
-                .time(now)
-                .build();
     }
 
     // ScheduleThread
     public AsyncDto useScheduleThreadPool(AsyncRequest request, LocalDateTime now) {
-        var threadpool = Executors.newScheduledThreadPool(2);
-        // threadpool.scheduleWithFixedDelay(new commonTask(), 1, 1, TimeUnit.SECONDS);
-        threadpool.scheduleWithFixedDelay(() -> {log.info(String.valueOf(Thread.currentThread().getId()));},
+        var threadPool = Executors.newScheduledThreadPool(2);
+        threadPool.scheduleWithFixedDelay(() -> {log.info(String.valueOf(Thread.currentThread().getId()));},
                 1, 1, TimeUnit.SECONDS);
-        threadpool.scheduleWithFixedDelay(() -> {log.info(String.valueOf(Thread.currentThread().getId()));},
+        threadPool.scheduleWithFixedDelay(() -> {log.info(String.valueOf(Thread.currentThread().getId()));},
                 1, 1, TimeUnit.SECONDS);
         try {
             Thread.sleep(10000);
         } catch (InterruptedException e) {
             throw new RuntimeException("割り込み処理が発生", e);
         }
-        threadpool.shutdown();
+        threadPool.shutdown();
 
         return AsyncDto.builder()
                 .status("success")
@@ -138,8 +144,59 @@ public class AsyncService {
                 .build();
     }
 
+    // ThreadPoolTaskExecutorを利用する
+    public AsyncDto useThreadPoolTask(AsyncRequest request, LocalDateTime now) {
+        threadPoolTaskExecutor.execute(() -> {
+            log.info(Thread.currentThread().getName() + Thread.currentThread().getId());
+            try{
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException("割り込み", e);
+            }
+            log.info("処理1終了");
+        });
 
-    // 共通タスク定義クラス
+        threadPoolTaskExecutor.execute(() -> {
+            log.info(Thread.currentThread().getName() + Thread.currentThread().getId());
+            try{
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException("割り込み", e);
+            }
+            log.info("処理2終了");
+        });
+
+        threadPoolTaskExecutor.execute(() -> {
+            IntStream.iterate(0, a -> a+1).limit(10).forEach(b -> log.info(String.valueOf(b)));
+            log.info("処理3終了");});
+
+        return AsyncDto.builder()
+                .status("success")
+                .result(true)
+                .time(now)
+                .build();
+    }
+
+    // ThreadPoolTaskExecutorを@Asyncで利用する
+    @Async("Thread1")
+    public void useThreadPoolTaskAsync() {
+        log.info("非同期start→" + Thread.currentThread().getId() + "、" + Thread.currentThread().getName());
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException("割り込み", e);
+        }
+        log.info("非同期finish→" + Thread.currentThread().getId() + "、"+ Thread.currentThread().getName());
+    }
+
+    public void useThreadPoolTaskAsyncTest() {
+        useThreadPoolTaskTest.useThreadPoolTaskAsync();
+        useThreadPoolTaskTest.useThreadPoolTaskAsync();
+        useThreadPoolTaskTest.useThreadPoolTaskAsync();
+    }
+
+
+    // 共通タスク定義クラス1
     private static class commonTask implements Runnable {
         @Override
         public void run(){
@@ -154,16 +211,22 @@ public class AsyncService {
 
             list.forEach(log::info);
             set.forEach(log::info);
+            IntStream.rangeClosed(1, 10).forEach(d -> log.info(String.valueOf(d)));
+            try{
+            Thread.sleep(2000);
+            } catch (InterruptedException e) {
+            throw new RuntimeException("割り込み", e);
+            }
             log.info(Thread.currentThread().getId() + Thread.currentThread().getName() + "← 終了します");
         }
     }
 
-
     @Data
     @Builder
     public static class AsyncDto {
-        public String status;
-        public boolean result;
-        public LocalDateTime time;
+        private String status;
+        private boolean result;
+        private String message;
+        private LocalDateTime time;
     }
 }

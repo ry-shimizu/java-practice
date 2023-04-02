@@ -4,6 +4,7 @@ import com.example.demo.Request.AsyncRequest;
 import com.example.demo.Response.AsyncResponse;
 import com.example.demo.Service.AsyncService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,5 +35,24 @@ public class AsyncController {
     @PostMapping("/useScheduleThreadPool")
     public AsyncResponse useScheduleThreadPool(@Validated @RequestBody AsyncRequest request) {
         return new AsyncResponse(asyncService.useScheduleThreadPool(request, LocalDateTime.now()));
+    }
+
+    @PostMapping("/useThreadPoolTask")
+    public AsyncResponse useThreadPoolTask(@Validated @RequestBody AsyncRequest request) {
+        return new AsyncResponse(asyncService.useThreadPoolTask(request, LocalDateTime.now()));
+    }
+
+    @PostMapping("/useThreadPoolTaskAsync")
+    public ResponseEntity<String> useThreadPoolTaskAsync() {
+        asyncService.useThreadPoolTaskAsync();
+        asyncService.useThreadPoolTaskAsync();
+        asyncService.useThreadPoolTaskAsync();
+        return ResponseEntity.ok("処理終了");
+    }
+
+    @PostMapping("/useThreadPoolTaskAsyncTest")
+    public ResponseEntity<String> useThreadPoolTaskAsyncTest() {
+        asyncService.useThreadPoolTaskAsyncTest();
+        return ResponseEntity.ok("処理終了");
     }
 }

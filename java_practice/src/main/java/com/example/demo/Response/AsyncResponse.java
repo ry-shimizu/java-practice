@@ -16,10 +16,13 @@ public class AsyncResponse {
     // 実行時刻
     private LocalDateTime time;
 
+    private String message;
+
     public AsyncResponse (AsyncService.AsyncDto dto) {
         this.status = dto.getStatus();
         this.result = dto.isResult();
         this.time = dto.getTime();
+        this.message = dto.getMessage();
     }
 
 }
