@@ -73,6 +73,8 @@ public class AsyncService {
         Future<String> result = thread.submit(new commonTask(), request.getMessage());
         try {
             log.info(result.get());
+            log.info("必ず上記スレッドの結果get待ち");
+            thread.shutdown();
         } catch (ExecutionException e) {
             throw new RuntimeException(now + "非同期処理中に問題発生", e);
         } catch (InterruptedException e) {
@@ -193,6 +195,36 @@ public class AsyncService {
         useThreadPoolTaskTest.useThreadPoolTaskAsync();
         useThreadPoolTaskTest.useThreadPoolTaskAsync();
         useThreadPoolTaskTest.useThreadPoolTaskAsync();
+    }
+
+    // CompletableFutureを利用
+    public void useCompletableFuture() {
+        var use1 = CompletableFuture.supplyAsync(
+                () -> {
+                        try{
+                            Thread.sleep(1000);
+                        } catch(InterruptedException e) {
+                            throw new RuntimeException("割り込み", e);
+                        }
+                        log.info("処理1終わり");
+                        return "処理1";
+                });
+
+        var use2 = use1.thenRunAsync(new commonTask(), threadPoolTaskExecutor);
+
+        var use3 = use1.thenApplyAsync(
+                value -> {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException("割り込み", e);
+                    }
+                    log.info("処理終わり→" + Thread.currentThread().getId() + Thread.currentThread().getName());
+                    return value + "+処理3";
+                }, threadPoolTaskExecutor);
+
+        use2.thenCombine(use3, (a,b) -> a + b)
+                .thenAccept(log::info);
     }
 
 

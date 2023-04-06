@@ -55,4 +55,10 @@ public class AsyncController {
         asyncService.useThreadPoolTaskAsyncTest();
         return ResponseEntity.ok("処理終了");
     }
+
+    @PostMapping("/useCompletableFuture")
+    public ResponseEntity<String> useCompletableFuture() {
+        asyncService.useCompletableFuture();
+        return ResponseEntity.ok("処理終了");
+    }
 }
