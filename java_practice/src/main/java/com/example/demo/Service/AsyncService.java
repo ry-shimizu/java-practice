@@ -225,6 +225,42 @@ public class AsyncService {
 
         use2.thenCombine(use3, (a,b) -> a + b)
                 .thenAccept(log::info);
+
+        log.info("メインスレッドは終わりです");
+    }
+
+    public void useCompletableFuture2() {
+        var use4 = CompletableFuture.supplyAsync(
+                () -> {
+                    try{
+                        Thread.sleep(1000);
+                    } catch(InterruptedException e) {
+                        throw new RuntimeException("割り込み", e);
+                    }
+                    log.info("use4終わり");
+                    return "use4";}, threadPoolTaskExecutor);
+
+        var use5 = use4.exceptionally(
+                e -> "割り込みエラーが発生" + e.getMessage());
+
+        var use6 = use4.thenApplyAsync(
+                value -> {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException("割り込み", e);
+                    }
+                    log.info("処理終わり→" + Thread.currentThread().getId() + Thread.currentThread().getName());
+                    return value + "+処理3";
+                }, threadPoolTaskExecutor);
+
+        var use7 = use4.thenRunAsync(new commonTask(), threadPoolTaskExecutor);
+
+        var use8 = use5.acceptEitherAsync(use6, log::info, threadPoolTaskExecutor);
+
+        use7.runAfterBothAsync(use8, new commonTask(), threadPoolTaskExecutor);
+        
+        log.info("メインスレッドは終わりです");
     }
 
 

@@ -61,4 +61,10 @@ public class AsyncController {
         asyncService.useCompletableFuture();
         return ResponseEntity.ok("処理終了");
     }
+
+    @PostMapping("/useCompletableFuture2")
+    public ResponseEntity<String> useCompletableFuture2() {
+        asyncService.useCompletableFuture2();
+        return ResponseEntity.ok("処理終了");
+    }
 }
