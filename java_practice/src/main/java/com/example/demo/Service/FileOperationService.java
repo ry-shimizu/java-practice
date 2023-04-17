@@ -1,7 +1,6 @@
 package com.example.demo.Service;
 
 import com.example.demo.Request.FileOperationRequest;
-import com.example.demo.Response.FileOperationResponse;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +8,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -70,14 +71,36 @@ public class FileOperationService {
     }
 
     public void bufferedWriter(FileOperationRequest request) {
-        var path = Paths.get("テストファイル.txt");
-        try(var writer = new BufferedWriter(new FileWriter(path.toFile(), true))) {
-            writer.write(request.getInput());
-            writer.newLine();
-            writer.write(request.getInput());
-            writer.flush();
-        } catch (IOException e) {
-            throw new RuntimeException("ファイル操作で問題が発生しました", e);
+        if(Stream.of("jpeg", "png", "jpg").anyMatch(a -> request.getInput().endsWith(a))) {
+            var pathOutput = Paths.get("テストファイル画像" + request.getInput().substring(request.getInput().lastIndexOf(".")));
+            var pathInput = Paths.get(request.getInput());
+            if(Files.exists(pathInput)) {
+                // このパスファイルから先にデータを読み出して、書き出す処理
+                try(var output = new BufferedOutputStream(new FileOutputStream(pathOutput.toFile()));
+                    var input = new BufferedInputStream(new FileInputStream(pathInput.toFile()))) {
+
+                    var data = new byte[1024];
+                    int len;
+
+                    while((len = input.read(data)) > 0) {
+                        output.write(data, 0, len);
+                    }
+                    output.flush();
+
+                } catch (IOException e) {
+                    throw new RuntimeException("ファイル操作で問題が発生しました", e);
+                }
+            }
+        } else {
+            var path3 = Paths.get("テストファイル.txt");
+            try(var writer = new BufferedWriter(new FileWriter(path3.toFile(), true))) {
+                writer.write(request.getInput());
+                writer.newLine();
+                writer.write(request.getInput());
+                writer.flush();
+            } catch (IOException e) {
+                throw new RuntimeException("ファイル操作で問題が発生しました", e);
+            }
         }
     }
 
