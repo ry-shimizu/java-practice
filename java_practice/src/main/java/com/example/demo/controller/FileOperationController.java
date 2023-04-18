@@ -38,4 +38,10 @@ public class FileOperationController {
         return ResponseEntity.ok("処理完了");
     }
 
+    @PostMapping("/zipStream")
+    public ResponseEntity<String> zipStream(@Validated @RequestBody FileOperationRequest request) {
+        fileOperationService.zipStream(request);
+        return ResponseEntity.ok("処理完了");
+    }
+
 }

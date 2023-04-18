@@ -11,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @Slf4j
@@ -100,6 +102,24 @@ public class FileOperationService {
                 writer.flush();
             } catch (IOException e) {
                 throw new RuntimeException("ファイル操作で問題が発生しました", e);
+            }
+        }
+    }
+
+
+    public void zipStream(FileOperationRequest request) {
+        var path = Paths.get(request.getInput());
+        var zipFilePath = Paths.get("テストまとめ.zip");
+        if (Files.exists(path)) {
+            try (var zip = new ZipOutputStream(new FileOutputStream(zipFilePath.toFile()))) {
+                var entry = new ZipEntry(path.getFileName().toString());
+                // 新しいファイル名を指定し、zip中に設定
+                zip.putNextEntry(entry);
+
+                var data = Files.readAllBytes(path);
+                zip.write(data);
+            } catch (IOException e) {
+                throw new RuntimeException("ファイル操作で問題が発生しました。", e);
             }
         }
     }
