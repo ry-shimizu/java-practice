@@ -112,12 +112,21 @@ public class FileOperationService {
         var zipFilePath = Paths.get("テストまとめ.zip");
         if (Files.exists(path)) {
             try (var zip = new ZipOutputStream(new FileOutputStream(zipFilePath.toFile()))) {
-                var entry = new ZipEntry(path.getFileName().toString());
-                // 新しいファイル名を指定し、zip中に設定
-                zip.putNextEntry(entry);
-
-                var data = Files.readAllBytes(path);
-                zip.write(data);
+                if (Files.isDirectory(path)) {
+                    Files.list(path).forEach(
+                            p -> {
+                                try {
+                                    zip.putNextEntry(new ZipEntry(p.getFileName().toString()));
+                                    zip.write(Files.readAllBytes(p));
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            });
+                } else {
+                    // 新しいファイル名を指定し、zip中に設定
+                    zip.putNextEntry(new ZipEntry(path.getFileName().toString()));
+                    zip.write(Files.readAllBytes(path));
+                }
             } catch (IOException e) {
                 throw new RuntimeException("ファイル操作で問題が発生しました。", e);
             }
