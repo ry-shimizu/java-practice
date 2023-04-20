@@ -80,12 +80,13 @@ public class FileOperationService {
                 // このパスファイルから先にデータを読み出して、書き出す処理
                 try(var output = new BufferedOutputStream(new FileOutputStream(pathOutput.toFile()));
                     var input = new BufferedInputStream(new FileInputStream(pathInput.toFile()))) {
-
+                    // output.write(Files.readAllBytes(pathInput)); このやり方もあるが、1度に読み込むのはメモリ不足になるかもしれない
                     var data = new byte[1024];
                     int len;
 
                     while((len = input.read(data)) > 0) {
                         output.write(data, 0, len);
+
                     }
                     output.flush();
 
@@ -109,19 +110,11 @@ public class FileOperationService {
 
     public void zipStream(FileOperationRequest request) {
         var path = Paths.get(request.getInput());
-        var zipFilePath = Paths.get("テストまとめ.zip");
+        var zipFilePath = Paths.get("/Users/shimizuryouya/Desktop/テストまとめ.zip");
         if (Files.exists(path)) {
-            try (var zip = new ZipOutputStream(new FileOutputStream(zipFilePath.toFile()))) {
+            try (var zip = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zipFilePath.toFile())))) {
                 if (Files.isDirectory(path)) {
-                    Files.list(path).forEach(
-                            p -> {
-                                try {
-                                    zip.putNextEntry(new ZipEntry(p.getFileName().toString()));
-                                    zip.write(Files.readAllBytes(p));
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            });
+                    directoryZip(path.getNameCount(), path, zip);
                 } else {
                     // 新しいファイル名を指定し、zip中に設定
                     zip.putNextEntry(new ZipEntry(path.getFileName().toString()));
@@ -131,6 +124,24 @@ public class FileOperationService {
                 throw new RuntimeException("ファイル操作で問題が発生しました。", e);
             }
         }
+    }
+
+    private void directoryZip(int rootCount, Path path, ZipOutputStream zip) throws IOException {
+        Files.list(path).forEach(
+                p -> {
+                    try {
+                        var pathName = p.subpath(rootCount, p.getNameCount());
+                        if (Files.isDirectory(p)) {
+                            zip.putNextEntry(new ZipEntry(pathName + "/"));
+                            directoryZip(rootCount, p, zip);
+                        } else {
+                            zip.putNextEntry(new ZipEntry(pathName.toString()));
+                            zip.write(Files.readAllBytes(p));
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException("ファイル操作で問題が発生しました。", e);
+                    }
+                });
     }
 
     @Data
