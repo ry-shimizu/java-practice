@@ -38,9 +38,15 @@ public class FileOperationController {
         return ResponseEntity.ok("処理完了");
     }
 
-    @PostMapping("/zipStream")
-    public ResponseEntity<String> zipStream(@Validated @RequestBody FileOperationRequest request) {
-        fileOperationService.zipStream(request);
+    @PostMapping("/zipOutputStream")
+    public ResponseEntity<String> zipOutputStream(@Validated @RequestBody FileOperationRequest request) {
+        fileOperationService.zipOutputStream(request);
+        return ResponseEntity.ok("処理完了");
+    }
+
+    @PostMapping("/zipInputStream")
+    public ResponseEntity<String> zipInputStream(@Validated @RequestBody FileOperationRequest request) {
+        fileOperationService.zipInputStream(request);
         return ResponseEntity.ok("処理完了");
     }
 

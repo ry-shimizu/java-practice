@@ -8,4 +8,6 @@ public class FileOperationRequest {
 
     @NotNull
     private String input;
+
+    private String output;
 }

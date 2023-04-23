@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 @Service
@@ -108,7 +109,7 @@ public class FileOperationService {
     }
 
 
-    public void zipStream(FileOperationRequest request) {
+    public void zipOutputStream(FileOperationRequest request) {
         var path = Paths.get(request.getInput());
         var zipFilePath = Paths.get("/Users/shimizuryouya/Desktop/テストまとめ.zip");
         if (Files.exists(path)) {
@@ -142,6 +143,26 @@ public class FileOperationService {
                         throw new RuntimeException("ファイル操作で問題が発生しました。", e);
                     }
                 });
+    }
+
+    public void zipInputStream(FileOperationRequest request) {
+        var inputPath = Paths.get(request.getInput());
+        try (var zipInput = new ZipInputStream(new BufferedInputStream(new FileInputStream(inputPath.toFile())))) {
+            Files.createDirectories(Paths.get(request.getOutput()));
+            ZipEntry zipEntry;
+            while ((zipEntry = zipInput.getNextEntry()) != null) {
+                 if (zipEntry.isDirectory()) {
+                    Files.createDirectories(Paths.get(request.getOutput() + "/" + zipEntry.getName()));
+                } else {
+                    try (var output = new BufferedOutputStream(
+                            new FileOutputStream(Paths.get(request.getOutput() + "/" + zipEntry.getName()).toFile()))){
+                        output.write(zipInput.readAllBytes());
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("ファイル操作で問題が発生しました", e);
+        }
     }
 
     @Data
