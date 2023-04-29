@@ -1,10 +1,8 @@
 package com.example.demo.Service;
 
-import com.lowagie.text.Document;
+import com.lowagie.text.*;
 import com.lowagie.text.Font;
-import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.BaseFont;
-import com.lowagie.text.pdf.PRIndirectReference;
 import com.lowagie.text.pdf.PdfWriter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
@@ -13,9 +11,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 
 @Service
@@ -52,7 +52,7 @@ public class PdfOperationService {
         }
     }
 
-    // 固定ファイルをダウンロードする(別方法)
+    // 固定ファイルをダウンロードする(別方法 コントローラーからレスポンス返却)
     public ResponseEntity<byte[]> otherPdfDl(HttpServletResponse response) {
         var input = Paths.get("/Users/shimizuryouya/Desktop/ファイル操作テスト/テストファイル.pdf");
         var respHeader = new HttpHeaders();
@@ -66,23 +66,39 @@ public class PdfOperationService {
         }
     }
 
-    // pdfを作成して、プレビューもしくはダウンロードさせる
+    // pdfを作成して、ダウンロードさせる
     public ResponseEntity<byte[]> createPdf() {
-        try (var inputStream = new BufferedInputStream(new FileInputStream(Paths.get("テストファイル.txt").toFile()))) {
+        try (var reader = new BufferedReader(new FileReader(Paths.get("テストファイル.txt").toFile()))) {
+            // 一時ファイルの作成処理
+            var file = Files.createTempFile("temp", ".pdf").toFile();
+
             var document = new Document();
-            var file = Paths.get("test.pdf").toFile();
             var pdfWriter = PdfWriter.getInstance(document, new BufferedOutputStream(new FileOutputStream(file)));
-            document.open();
-            var font = new Font(BaseFont.createFont("HeiseiMin-W3", "UniJIS-UCS2-H", BaseFont.EMBEDDED));
+
             // ここで日本語を利用できないので、上記で日本語のフォントが利用できるように設定
             // 引数(フォント、PDF出力オプション日本語、PDFにフォントを埋め込むかどうかファイルサイズは大きくなる)
-            document.add(new Paragraph("日本語使えてる？", font));
+            var baseFont = BaseFont.createFont("HeiseiMin-W3", "UniJIS-UCS2-H", BaseFont.NOT_EMBEDDED);
+            // タイトル用
+            var titleFont = new Font(baseFont, 20f, Font.ITALIC, Color.RED);
+            // 本文用
+            var font = new Font(baseFont, 12f, java.awt.Font.PLAIN, Color.BLACK);
+            document.open();
+            var title = new Paragraph("PDF作成のタイトルです", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            document.add(title);
+            document.add(new Paragraph(Chunk.NEWLINE));
+            String line = "";
+            while ((line = reader.readLine()) != null) {
+                document.add(new Paragraph(line, font));
+            }
+            // closeする順番も重要。先にdocumentを閉じる
             document.close();
             pdfWriter.close();
             return ResponseEntity
                     .ok()
                     .contentType(MediaType.APPLICATION_PDF)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + file.getName())
+                    // ファイル名も日本語不可 URL
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + URLEncoder.encode("テスト.pdf", StandardCharsets.UTF_8))
                     .body(new BufferedInputStream(new FileInputStream(file)).readAllBytes());
         } catch (IOException e) {
             throw new RuntimeException("ファイル操作で問題発生", e);
