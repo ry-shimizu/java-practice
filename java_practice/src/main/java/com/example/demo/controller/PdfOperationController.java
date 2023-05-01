@@ -33,4 +33,9 @@ public class PdfOperationController {
         return pdfOperationService.createPdf();
     }
 
+    @GetMapping("/usedHtmlPdf")
+    public void usedHtmlPdf(HttpServletResponse response) {
+        pdfOperationService.usedHtmlPdf(response);
+    }
+
 }

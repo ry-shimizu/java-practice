@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.xhtmlrenderer.pdf.ITextRenderer;
+import org.xhtmlrenderer.resource.CSSResource;
 
 import java.awt.*;
 import java.io.*;
@@ -101,6 +103,29 @@ public class PdfOperationService {
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + URLEncoder.encode("テスト.pdf", StandardCharsets.UTF_8))
                     .body(new BufferedInputStream(new FileInputStream(file)).readAllBytes());
         } catch (IOException e) {
+            throw new RuntimeException("ファイル操作で問題発生", e);
+        } catch (DocumentException e) {
+            throw new RuntimeException("ドキュメント操作で問題発生", e);
+        }
+    }
+
+    // htmlを読み込んでPDF化、インラインで
+    public void usedHtmlPdf(HttpServletResponse response) {
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "inline");
+        var htmlFile = Paths.get("PDF関連/テストhtml.html");
+        try (var res = response.getOutputStream()) {
+            String stringHtml = null;
+            if (htmlFile.toFile().exists()) {
+                stringHtml = Files.readString(htmlFile, StandardCharsets.UTF_8);
+            } else {
+                throw new RuntimeException("ファイルが存在していない");
+            }
+           var render = new ITextRenderer();
+            render.setDocumentFromString(stringHtml);
+            render.layout();
+            render.createPDF(res);
+        } catch (IOException | DocumentException e) {
             throw new RuntimeException("ファイル操作で問題発生", e);
         }
     }
