@@ -28,6 +28,8 @@ public class MailSenderService {
     private final MailConfig mailConfig;
     private final MailConfigValue mailConfigValue;
 
+    private final PdfOperationService pdfOperationService;
+
     public boolean sendMail() {
             var mailInfo = new SimpleMailMessage();
             mailInfo.setSubject("javaの実装練習です");
@@ -50,11 +52,12 @@ public class MailSenderService {
         var message = javaMailSender.createMimeMessage();
         try {
             var messageHelper = new MimeMessageHelper(message, true);
-            messageHelper.setFrom("ryouya56395639@gmail.com");
+            messageHelper.setFrom(new InternetAddress("ryouya56395639@gmail.com", "テスト"));
             messageHelper.setTo("nagahisawebpage@gmail.com");
             messageHelper.setText("お元気ですかテストです。JavaMail利用です",
                     "<span style='color: red'>赤文字出力</span><br>段落下げた");
             messageHelper.setSubject("タイトルですよ");
+            messageHelper.addAttachment("メール送信PDF.pdf", pdfOperationService.createPdf("メール送信テスト", "メール送信テストの内容です").toFile());
 
             javaMailSender.send(message);
             return true;
@@ -64,6 +67,8 @@ public class MailSenderService {
             throw new RuntimeException("メッセージの設定に失敗しました", e);
             // 終わらせず、処理を続けるのであれば、スタックトレースを残す
             // e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("エンコード対象ではない文字が利用されています" ,e);
         }
     }
 
