@@ -5,20 +5,20 @@ import com.lowagie.text.Font;
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfWriter;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.xhtmlrenderer.pdf.ITextRenderer;
-import org.xhtmlrenderer.resource.CSSResource;
 
 import java.awt.*;
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 public class PdfOperationService {
@@ -131,5 +131,70 @@ public class PdfOperationService {
     }
 
     // zipの中にpdfを作成して、ダウンロードさせる
+    public ResponseEntity<byte[]> zipInPdf() {
+        var resHeader = new HttpHeaders();
+        resHeader.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        resHeader.setContentDisposition(ContentDisposition.attachment().filename("zipInPdf.zip").build());
+        Path zipTempFile = null;
+        try {
+            zipTempFile = Files.createTempFile("temp", ".zip");
+        } catch (IOException e) {
+            throw new RuntimeException("一時ファイル作成でエラーが発生しました", e);
+        }
+        var pdfPath = createPdf("zipの中にPDFを作成する処理", "作成テストになります");
 
+        try (var zipStream = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zipTempFile.toFile())))) {
+            zipStream.putNextEntry(new ZipEntry(pdfPath.getFileName().toString()));
+            zipStream.write(Files.readAllBytes(pdfPath));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("ファイルが存在しません", e);
+        } catch (IOException e) {
+            throw new RuntimeException("ファイル操作でエラーが発生しました", e);
+        }
+
+        byte[] zipByte = null;
+        try {
+            zipByte = Files.readAllBytes(zipTempFile);
+        } catch (IOException e) {
+            throw new RuntimeException("ファイル操作でエラーが発生しました", e);
+        }
+
+        return ResponseEntity
+                .ok()
+                .headers(resHeader)
+                .body(zipByte);
+    }
+
+    public Path createPdf(String title, String content) {
+        Path pdfTempFile = null;
+        try {
+            pdfTempFile = Files.createTempFile("temp", ".pdf");
+        } catch (IOException e) {
+            throw new RuntimeException("一時ファイル作成でエラーが発生しました", e);
+        }
+
+        var document = new Document();
+        PdfWriter pdfWriter = null;
+        try {
+            pdfWriter = PdfWriter.getInstance(document, new BufferedOutputStream(new FileOutputStream(pdfTempFile.toFile())));
+            var baseFont = BaseFont.createFont("HeiseiMin-W3", "UniJIS-UCS2-H", BaseFont.NOT_EMBEDDED);
+            // タイトル用
+            var titleFont = new Font(baseFont, 20f, Font.ITALIC, Color.RED);
+            // 本文用
+            var font = new Font(baseFont, 12f, java.awt.Font.PLAIN, Color.BLACK);
+            document.open();
+            document.add(new Paragraph(title, titleFont));
+            document.add(new Paragraph(content, font));
+            document.close();
+            pdfWriter.close();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("ファイルが存在しません", e);
+        } catch (DocumentException e) {
+            throw new RuntimeException("ドキュメント操作でエラーが発生しました", e);
+        } catch (IOException e) {
+            throw new RuntimeException("フォント操作でエラーが発生しました", e);
+        }
+
+        return pdfTempFile;
+    }
 }

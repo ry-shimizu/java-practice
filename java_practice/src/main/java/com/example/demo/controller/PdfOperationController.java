@@ -38,4 +38,8 @@ public class PdfOperationController {
         pdfOperationService.usedHtmlPdf(response);
     }
 
+    @GetMapping("/zipInPdf")
+    public ResponseEntity<byte[]> zipInPdf() {
+        return pdfOperationService.zipInPdf();
+    }
 }
