@@ -1,7 +1,7 @@
 package com.example.demo.Service;
 
-import com.example.demo.config.MailConfig;
-import com.example.demo.config.MailConfigValue;
+import com.example.demo.Config.MailConfig;
+import com.example.demo.Config.MailConfigValue;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;

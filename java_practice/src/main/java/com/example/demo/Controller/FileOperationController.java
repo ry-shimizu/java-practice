@@ -1,4 +1,4 @@
-package com.example.demo.controller;
+package com.example.demo.Controller;
 
 import com.example.demo.Request.FileOperationRequest;
 import com.example.demo.Response.FileOperationResponse;

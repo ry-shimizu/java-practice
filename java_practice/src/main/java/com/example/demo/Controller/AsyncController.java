@@ -1,4 +1,4 @@
-package com.example.demo.controller;
+package com.example.demo.Controller;
 
 import com.example.demo.Request.AsyncRequest;
 import com.example.demo.Response.AsyncResponse;
