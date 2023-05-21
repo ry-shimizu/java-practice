@@ -16,9 +16,15 @@ public class RetryController {
         return retryService.retryTest();
     }
 
-    @PostMapping("/retryTemplate")
-    public ResponseEntity<Void> retryTemplate() {
-        retryService.retryTemplate();
+    @PostMapping("/normalTemplate")
+    public ResponseEntity<Void> normalTemplate() {
+        retryService.normalTemplate();
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/customTemplate")
+    public ResponseEntity<Void> customTemplate() {
+        retryService.customTemplate();
         return ResponseEntity.ok().build();
     }
 }
