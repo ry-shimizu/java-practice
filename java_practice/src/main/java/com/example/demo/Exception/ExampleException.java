@@ -1,14 +1,17 @@
 package com.example.demo.Exception;
 
-public class ExampleException extends RuntimeException{
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-    public String message;
+@Data
+@EqualsAndHashCode(callSuper = false)
+public class ExampleException extends RuntimeException {
 
-    public String id;
+    private int id;
 
-    public ExampleException(String message, String id) {
-        super(id + "：" + message);
-        this.message = message;
+    public ExampleException(String message, int id) {
+        super(message);
         this.id = id;
     }
 }
