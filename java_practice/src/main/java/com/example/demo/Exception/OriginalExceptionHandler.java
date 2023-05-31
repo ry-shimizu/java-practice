@@ -15,4 +15,10 @@ public class OriginalExceptionHandler {
         log.error(e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CommonErrorResponse(e.getMessage(), e.getId()));
     }
+
+    @ExceptionHandler(ChildExampleException.class)
+    public ResponseEntity<Object> childExampleExceptionHandler(ChildExampleException e) {
+        log.warn(e.getMessage(), e);
+        return ResponseEntity.internalServerError().body(new CommonErrorResponse(e.getMessage(), e.getId()));
+    }
 }
