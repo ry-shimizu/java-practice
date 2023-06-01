@@ -1,7 +1,11 @@
 package com.example.demo.Config;
 
+import com.example.demo.Exception.ExampleException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
+import org.springframework.retry.RetryListener;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.ExceptionClassifierRetryPolicy;
 import org.springframework.retry.policy.NeverRetryPolicy;
@@ -38,10 +42,21 @@ public class RetryConfig {
 
     @Bean(name = "customTemplate")
     public RetryTemplate retryTemplate(ExceptionClassifierRetryPolicy exceptionClassifierRetryPolicy, FixedBackOffPolicy fixedBackOffPolicy) {
+        var retryListener = new RetryListener() {
+            @Override
+            public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback,
+                                                  Throwable throwable) {
+                if (context.getRetryCount() ==3) {
+                    throw new ExampleException("retryListerからのエラー出力", 500);
+                }
+            }
+        };
+
         return RetryTemplate
                 .builder()
                 .customPolicy(exceptionClassifierRetryPolicy)
                 .customBackoff(fixedBackOffPolicy)
+                .withListener(retryListener)
                 .build();
     }
 
