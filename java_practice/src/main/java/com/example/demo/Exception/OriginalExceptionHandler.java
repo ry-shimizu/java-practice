@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.RestClientException;
 
 @RestControllerAdvice
 @Slf4j
@@ -20,5 +21,11 @@ public class OriginalExceptionHandler {
     public ResponseEntity<Object> childExampleExceptionHandler(ChildExampleException e) {
         log.warn(e.getMessage(), e);
         return ResponseEntity.internalServerError().body(new CommonErrorResponse(e.getMessage(), e.getId()));
+    }
+
+    @ExceptionHandler(RestClientException.class)
+    public ResponseEntity<Object> restClientExceptionHandler(RestClientException e) {
+        log.error(e.getMessage(), e);
+        return new ResponseEntity<>(new CommonErrorResponse(e.getMessage(), 0), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
