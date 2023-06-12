@@ -1,11 +1,14 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Request.QitaWriteReactionsRequest;
+import com.example.demo.Request.RequestSorce.QitaDeleteCommentRequest;
 import com.example.demo.Response.QitaGetItemCommentResponse;
 import com.example.demo.Response.QitaWriteReactionsResponse;
+import com.example.demo.Service.QitaDeleteCommentService;
 import com.example.demo.Service.QitaGetItemCommentService;
 import com.example.demo.Service.QitaWriteReactionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +22,8 @@ public class QitaApiCallController {
 
     private final QitaGetItemCommentService qitaGetItemCommentService;
 
+    private final QitaDeleteCommentService qitaDeleteCommentService;
+
     @PostMapping("/writeReactions")
     public QitaWriteReactionsResponse writeReactions(@RequestBody @Validated QitaWriteReactionsRequest request) {
         return new QitaWriteReactionsResponse(qitaWriteReactionService.WriteReactions(request));
@@ -27,5 +32,10 @@ public class QitaApiCallController {
     @PostMapping("/getItemComment")
     public QitaGetItemCommentResponse qitaGetItemComment(@RequestBody @Validated QitaWriteReactionsRequest request) {
         return new QitaGetItemCommentResponse(qitaGetItemCommentService.qitaGetItemComment(request));
+    }
+
+    @PostMapping("/deleteComment")
+    public ResponseEntity<Void> deleteComment(@RequestBody @Validated QitaDeleteCommentRequest request) {
+        return qitaDeleteCommentService.qitaDeleteComment(request);
     }
 }
