@@ -14,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,6 +31,11 @@ public class QitaApiCallController {
     @PostMapping("/writeReactions")
     public QitaWriteReactionsResponse writeReactions(@RequestBody @Validated QitaWriteReactionsRequest request) {
         return new QitaWriteReactionsResponse(qitaWriteReactionService.WriteReactions(request));
+    }
+
+    @PostMapping("/useWebClientWriteReactions")
+    public Mono<QitaWriteReactionService.QitaWriteReactionsDto> useWebClientWriteReactions(@RequestBody @Validated QitaWriteReactionsRequest request) {
+        return qitaWriteReactionService.useWebClientWriteReactions(request);
     }
 
     @PostMapping("/getItemComment")

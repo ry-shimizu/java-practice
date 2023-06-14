@@ -12,6 +12,13 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.BodyInserter;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
+
+import java.time.Duration;
 
 @Service
 @Slf4j
@@ -43,6 +50,32 @@ public class QitaWriteReactionService {
         } catch (HttpServerErrorException e) {
             throw new RestClientException("500系エラーが発生しました", e);
         }
+    }
+
+    public Mono<QitaWriteReactionsDto> useWebClientWriteReactions(QitaWriteReactionsRequest request) {
+        // url作成
+        var url = new StringBuilder()
+                .append(Constant.qitaBaseUrl)
+                .append("/api/v2/items/")
+                .append(request.getItemId())
+                .append("/comments").toString();
+
+        var requestBody = new QitaWriteReactionsResource("テストでコメントします");
+
+        var webClient = WebClient.builder()
+                .defaultHeader("Authorization", "Bearer " + "")
+                .build();
+
+        return webClient
+                .post()
+                .uri(url)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(requestBody))
+                .retrieve()
+                .bodyToMono(QitaWriteReactionsDto.class)
+                .retryWhen(Retry.fixedDelay(3,  Duration.ofMillis(1000))
+                        .doBeforeRetry(a ->
+                                log.warn("コメント取得API失敗、リトライ回数:"+ a.totalRetries() + a.failure())));
     }
 
     @Data
