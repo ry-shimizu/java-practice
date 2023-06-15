@@ -38,6 +38,11 @@ public class QitaApiCallController {
         return qitaWriteReactionService.useWebClientWriteReactions(request);
     }
 
+    @PostMapping("/useRetrofit2")
+    public QitaWriteReactionsResponse useRetrofit2(@RequestBody @Validated QitaWriteReactionsRequest request) {
+        return new QitaWriteReactionsResponse(qitaWriteReactionService.useRetrofit2(request));
+    }
+
     @PostMapping("/getItemComment")
     public QitaGetItemCommentResponse qitaGetItemComment(@RequestBody @Validated QitaWriteReactionsRequest request) {
         return new QitaGetItemCommentResponse(qitaGetItemCommentService.qitaGetItemComment(request));
