@@ -1,16 +1,14 @@
 package com.example.demo.Batch;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
-public class TestBatch {
+public class ScheduleBatch {
 
     final static LocalDateTime now = LocalDateTime.now();
 
