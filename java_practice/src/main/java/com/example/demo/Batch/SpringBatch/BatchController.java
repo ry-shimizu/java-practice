@@ -24,7 +24,7 @@ public class BatchController {
                     new JobParametersBuilder().addString("mainCharacter", mainCharacter).toJobParameters());
         return ResponseEntity.ok("ok");
         } catch (JobExecutionException e) {
-            throw new ChildExampleException("jobの実行に失敗しました", 0);
+            throw new ChildExampleException("jobの実行に失敗しました", 0, e);
         }
    }
 
