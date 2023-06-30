@@ -41,7 +41,6 @@ public class JobConfig {
         log.info("firstBattle開始");
         return new StepBuilder("firstBattle", jobRepository)
                 .tasklet(firstTasklet, platformTransactionManager)
-                .allowStartIfComplete(true)
                 .build();
     }
 
@@ -77,3 +76,6 @@ public class JobConfig {
         return tasklet;
     }
 }
+// 途中から実行されるか
+// jobインスタンスは一意である必要あり
+// エラー時に再実施
